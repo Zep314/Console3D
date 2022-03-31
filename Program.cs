@@ -86,7 +86,7 @@ namespace Console3D
             for(int i=0; i<height; i++)
                 for (int j=0; j<width; j++)
                 {
-                    screen[i+j*height]=(byte)'@';
+                    screen[i+j*height]=(byte)'$';
                 }
             var stdout = Console.OpenStandardOutput(width * height);
             stdout.Write(screen,0,screen.Length);
