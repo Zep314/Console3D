@@ -75,7 +75,12 @@ namespace Console3D
         float step(float edge, float x) { if (x > edge) {return 1;} else {return 0;} }
         float length(vec2 v) { return MathF.Sqrt(v.x * v.x + v.y * v.y); }
         float length(vec3 v) { return MathF.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
-        vec3 norm(vec3 v) { return v / length(v); }
+       vec3 norm(vec3 v) 
+        {
+            vec3 ret = new vec3();
+            ret = v;
+            return ret / length(v);
+        }
         float dot(vec3 a, vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
         vec3 abs(vec3 v) { return new vec3(MathF.Abs(v.x), MathF.Abs(v.y), MathF.Abs(v.z)); }
         vec3 sign(vec3 v) { return new vec3(MathF.Sign(v.x), MathF.Sign(v.y), MathF.Sign(v.z)); }
@@ -83,21 +88,24 @@ namespace Console3D
         vec3 reflect(vec3 rd, vec3 n) { return rd - n * (2 * dot(n, rd)); }
         vec3 rotateX(vec3 a, float angle)
         {
-            vec3 b = a;
+            vec3 b = new vec3();
+            b = a;
             b.z = a.z * MathF.Cos(angle) - a.y * MathF.Sin(angle);
             b.y = a.z * MathF.Sin(angle) + a.y * MathF.Cos(angle);
             return b;
         }
         vec3 rotateY(vec3 a, float angle)
         {
-            vec3 b = a;
+            vec3 b = new vec3(); 
+            b = a;
             b.x = a.x * MathF.Cos(angle) - a.z * MathF.Sin(angle);
             b.z = a.x * MathF.Sin(angle) + a.z * MathF.Cos(angle);
             return b;
         }
         vec3 rotateZ(vec3 a, float angle)
         {
-            vec3 b = a;
+            vec3 b = new vec3();
+            b = a;
             b.x = a.x * MathF.Cos(angle) - a.y * MathF.Sin(angle);
             b.y = a.x * MathF.Sin(angle) + a.y * MathF.Cos(angle);
             return b;
@@ -158,9 +166,9 @@ namespace Console3D
         				uv.x *= aspect * pixelAspect;
         				vec3 ro = new vec3(-6, 0, 0);
 				        vec3 rd = norm(new vec3(2, uv));
-				        ro = rotateY(ro, 0.25);
-				        rd = rotateY(rd, 0.25);
-				        ro = rotateZ(ro, t * 0.01f);
+				        ro = rotateY(ro, (float)0.25);
+				        rd = rotateY(rd, (float)0.25);
+				        ro = rotateZ(ro, (float)(t * 0.01));
 				        rd = rotateZ(rd, (float)(t * 0.01));
 				        float diff = 1;
                         /// тут остановился
