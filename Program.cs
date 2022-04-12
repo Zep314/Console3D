@@ -248,6 +248,14 @@ namespace Console3D
         {
             return this / this.Length(); 
         }
+        public vec3 Abs() 
+        { 
+            return new vec3(MathF.Abs(this.x), MathF.Abs(this.y), MathF.Abs(this.z)); 
+        }
+        public vec3 Sign() 
+        { 
+            return new vec3(MathF.Sign(this.x), MathF.Sign(this.y), MathF.Sign(this.z));
+        }
 
         public void RotateX(float angle)
         {
@@ -279,7 +287,15 @@ namespace Console3D
     {
         static void Main(string[] args)
         {
+            float clamp(float value, float min, float max) { return MathF.Max(MathF.Min(value, max), min); }
             float dot(vec3 a, vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+            float Step(float edge, float x) { if (x > edge) {return 1;} else {return 0;} }
+            vec3 reflect(vec3 rd, vec3 n) { return rd - n * (2 * dot(n, rd)); }
+
+            vec3 Step1(vec3 edge, vec3 v) 
+            {
+                return new vec3(Step(edge.x, v.x), Step(edge.y, v.y), Step(edge.z, v.z)); 
+            }
             vec2 Sphere(vec3 ro, vec3 rd, float r) 
             {
                 float b = dot(ro, rd);
@@ -294,7 +310,7 @@ namespace Console3D
             {
                 vec3 m = new vec3((float)1.0) / rd;
                 vec3 n = m * ro;
-                vec3 k = abs(m) * boxSize;  ////////////!!!!!!!!!!!!!!!!!!!!!!!!!!
+                vec3 k = m.Abs() * boxSize;  ////////////!!!!!!!!!!!!!!!!!!!!!!!!!!
                 vec3 t1 = -n - k;
                 vec3 t2 = -n + k;
                 float tN = MathF.Max(MathF.Max(t1.x, t1.y), t1.z);
@@ -302,21 +318,26 @@ namespace Console3D
                 if (tN > tF || tF < 0.0) return new vec2((float)-1.0);
                 vec3 yzx = new vec3(t1.y, t1.z, t1.x);
                 vec3 zxy = new vec3(t1.z, t1.x, t1.y);
-                outNormal = -sign(rd) * step(yzx, t1) * step(zxy, t1);
+                outNormal = -rd.Sign() * Step1(yzx, t1) * Step1(zxy, t1);
                 return new vec2(tN, tF);
+            }
+            float plane(vec3 ro, vec3 rd, vec3 p, float w)
+            {
+                return -(dot(ro, p) + w) / dot(rd, p);
             }
 
 
             int width = Console.WindowWidth;
  	        int height = Console.WindowHeight;
+//            Console.WriteLine($"{width} {height}");
             float aspect = (float)width / height;
             float pixelAspect = 11.0f / 24.0f;
             string gradient = " .:!/r(l1Z4H9W8$@";
             int gradientSize = gradient.Length - 2;
+            byte [] screen = new byte[width*height];
 
-
-//            for (int t = 0; t < 10000; t++) 
-            for (int t = 0; t < 2; t++) 
+            for (int t = 0; t < 1000; t++) 
+//            for (int t = 0; t < 1; t++) 
             {
                 vec3 light = new vec3((float)-0.5, (float)0.5, (float)-1.0).Norm();
                 vec3 spherePos = new vec3(0, 3, 0);
@@ -337,8 +358,8 @@ namespace Console3D
                         {
                             float minIt = 99999;
                             vec2 intersection = new vec2(0);
-                            intersection = Sphere(ro - spherePos, rd, 1);
                             vec3 n = new vec3(0);
+                            intersection = Sphere(ro - spherePos, rd, 1);
                             float albedo = 1;
                             if (intersection.x > 0) 
                             {
@@ -346,20 +367,38 @@ namespace Console3D
 						        minIt = intersection.x;
         						n = itPoint;
                                 n.Norm();
-                                
-                                vec3 boxN = new vec3(0);
-					            intersection = box(ro, rd, 1, boxN);
-					            if (intersection.x > 0 && intersection.x < minIt) 
-                                {
-    						        minIt = intersection.x;
-						            n = boxN;
-					            }                                
-					        }                            
-
+					        }   
+                            vec3 boxN = new vec3(0);
+					        intersection = box(ro, rd, new vec3(1), boxN);
+					        if (intersection.x > 0 && intersection.x < minIt) 
+                            {
+    						    minIt = intersection.x;
+						        n = boxN;
+					        }                             
+                            vec3 v_3 = new vec3(0,0,-1);
+                            intersection = new vec2(plane(ro, rd, v_3, (float)1));
+					        if (intersection.x > 0 && intersection.x < minIt)
+                            {
+						        minIt = intersection.x;
+						        n = new vec3(0, 0, -1);
+						        albedo = (float)0.5;
+					        }
+                            if (minIt < 99999) 
+                            {
+						        diff *= (float)((dot(n, light) * 0.5 + 0.5) * albedo);
+						        ro = ro + rd * (float)(minIt - 0.01);
+						        rd = reflect(rd, n);
+					        }
+					        else break;
                         }    
-
+                        int color = (int)(diff * 20);
+				        color = (int)clamp((float)color, (float)0, (float)gradientSize);
+				        char pixel = gradient[color];                        
+                        screen[i+j*width]=(byte)pixel;
                     }
-                }        
+                }
+                var stdout = Console.OpenStandardOutput(width * height);
+                stdout.Write(screen,0,screen.Length);        
             }
 
         }
