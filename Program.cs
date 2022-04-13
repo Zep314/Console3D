@@ -326,6 +326,7 @@ namespace Console3D
                 return -(dot(ro, p) + w) / dot(rd, p);
             }
 
+            ////////////////////////// САМА ПРОГРАММА  ////////////////////////////
 
             int width = Console.WindowWidth;
  	        int height = Console.WindowHeight;
@@ -336,7 +337,7 @@ namespace Console3D
             int gradientSize = gradient.Length - 2;
             byte [] screen = new byte[width*height];
 
-            for (int t = 0; t < 1000; t++) 
+            for (int t = 0; t < 10; t++) 
 //            for (int t = 0; t < 1; t++) 
             {
                 vec3 light = new vec3((float)-0.5, (float)0.5, (float)-1.0).Norm();
@@ -354,13 +355,13 @@ namespace Console3D
                         ro.RotateZ((float) t*(float)0.01);
                         rd.RotateZ((float) t*(float)0.01);
                         float diff = 1;
-                        for (int k = 0; k < 5; k++)
+                        for (int k = 0; k < 1; k++)
                         {
                             float minIt = 99999;
                             vec2 intersection = new vec2(0);
                             vec3 n = new vec3(0);
-                            intersection = Sphere(ro - spherePos, rd, 1);
                             float albedo = 1;
+                            intersection = Sphere(ro - spherePos, rd, 1);
                             if (intersection.x > 0) 
                             {
 						        vec3 itPoint = ro - spherePos + rd * intersection.x;
